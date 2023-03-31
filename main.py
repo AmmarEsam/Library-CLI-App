@@ -2,6 +2,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from typing import Optional
+from database import connect
 
 console = Console()
 
@@ -39,4 +40,4 @@ def display_table():
 
 
 if __name__ == "__main__":
-    app()
+    connect()
