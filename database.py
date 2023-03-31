@@ -5,7 +5,7 @@ def connect():
     try:
         print('Connecting to the PostgreSQL database...')
         conn = psycopg2.connect(
-            host="localhost", database="library_project", user="postgres", password=123456
+            host="localhost", database="library_project", user="postgres", password='postgres'
         )
         cur = conn.cursor()
         conn.autocommit = True
