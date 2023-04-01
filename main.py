@@ -2,25 +2,24 @@ import typer
 from rich.console import Console
 from rich.table import Table
 from typing import Optional
-from database import connect, close
+from database import connect, close, is_username_exists
+
+def set_logined_true(username, cur):
+    '''Set True for logined user in Customer table'''
+    status_query = f"UPDATE customer SET is_logined = TRUE WHERE username = '{username}'"
+    cur.execute(status_query)
+
+def is_logined(cur):
+    '''Return True if user is logined'''
+    bd_query = "SELECT username FROM customer where is_logined = TRUE LIMIT 1"
+    cur.execute(bd_query)
+    status = cur.fetchone()
+    if status:
+        return True
+
 
 console = Console()
-
 app = typer.Typer()
-
-is_loggined = False
-
-#____________COMMON METHODS_____________________:
-def is_username_exists(name):
-    querry = 'SELECT username FROM customer'
-    cur.execute(querry)
-    users_list = [i[0] for i in cur.fetchall()]
-    if name in users_list:
-        return True
-    else:
-        return False
-    
-#____________END_COMMON_METHODS__________________
 
 @app.command("start")
 def start():
@@ -52,12 +51,14 @@ def sign_up(username: str, password: str):
         err_message = 'This username already exists! Try another username'
         typer.secho(err_message, fg=typer.colors.RED)
         username = input('Enter your username: ').strip()
+        password = input('Enter your password: ')
         sign_up(username, password)
     else:
         query = f"INSERT INTO customer (first_name, username, password) \
                 VALUES ('{username.title()}', '{username}', '{password}')"
         cur.execute(query)
-        typer.secho(f"Nice that you are signing up!", fg=typer.colors.GREEN)
+        set_logined_true(username, cur)
+        typer.secho(f"Successfully signed up and signied in!", fg=typer.colors.GREEN)
         typer.secho('You can add your info for delivery later using function --help',\
             fg=typer.colors.BLUE)
     close()
@@ -65,16 +66,15 @@ def sign_up(username: str, password: str):
 
 @app.command("sign_in")
 def sign_in(username: str, password: str):
-    connect()
+    cur = connect()
     querry = f"SELECT password FROM customer WHERE username = '{username}'"
     cur.execute(querry)
     password_db = cur.fetchone()
-    print(f'pass = {password_db}')
     if is_username_exists(username):
         if password in password_db:
-            global is_loggined
-            is_loggined = True
-            typer.secho("Successfully signed up!", fg=typer.colors.GREEN)
+            typer.secho("Successfully signed in!", fg=typer.colors.GREEN)
+            set_logined_true(username, cur)
+            is_logined(cur)
         else:
             typer.secho("Wrong password", fg=typer.colors.RED)
     else: 
@@ -100,4 +100,4 @@ def display_table():
 
 
 if __name__ == "__main__":
-    start()
+    app()

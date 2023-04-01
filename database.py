@@ -9,6 +9,7 @@ def connect():
         conn = psycopg2.connect(
             host="localhost", database="library_project", user="postgres", password='postgres'
         )
+        global cur
         cur = conn.cursor()
         conn.autocommit = True
         # print('Connected to the PostgreSQL database Successfully...')
@@ -21,3 +22,16 @@ def connect():
 def close():
     if conn is not None:
         conn.close()
+        print('Conn closed')
+
+#____________COMMON METHODS_____________________:
+
+def is_username_exists(name):
+    querry = 'SELECT username FROM customer'
+    cur.execute(querry)
+    users_list = [i[0] for i in cur.fetchall()]
+    if name in users_list:
+        return True
+    else:
+        return False
+    
