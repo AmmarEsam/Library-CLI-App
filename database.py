@@ -27,6 +27,7 @@ def close():
 #____________COMMON METHODS_____________________:
 
 def is_username_exists(name):
+    
     querry = 'SELECT username FROM customer'
     cur.execute(querry)
     users_list = [i[0] for i in cur.fetchall()]
