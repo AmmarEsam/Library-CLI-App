@@ -3,6 +3,7 @@ from rich.console import Console
 from rich.table import Table
 from typing import Optional
 from database import connect, close, is_username_exists
+from datetime import datetime, timedelta
 
 def set_logined_true(username, cur):
     '''Set True for logined user in Customer table'''
@@ -47,11 +48,11 @@ cur = connect()
 @app.command("start")
 def start():
     typer.secho(f'''Welcome to Library CLI!\n
-        You can execute command '--help' to see the possible commands
+        
         Enter [r]egister for signing up
         Enter [l]et me in for signing in.
         Press other button for continue without signing in''', fg=typer.colors.GREEN)
-    
+    log_out()
     global cur
     answer = input().strip().lower()
     if answer in ['r', 'reg', 'register']:
@@ -65,9 +66,101 @@ def start():
         password = input('Enter your password: ')
         sign_in(username, password)
     else:
-        pass
-    close()
+        main_menu()
+    
 
+
+@app.command("main_menu")
+def main_menu():
+    global cur
+    status = is_logined(cur)
+    if not status: 
+       typer.secho(f''''
+        1 - Search a book by Name
+        2 - Search a book by Author
+        3 - Recently Added Books
+        4 - Most Read Books
+        5 - Most Favorite Books
+        6 - Most Read Genres
+        7 - Most Read Authors
+        8 - Exit
+        \n ''', fg=typer.colors.BLUE)
+       answer = input("Enter the number of the command:").strip()
+       if answer == '1':
+           search_by_name()
+       elif answer == '2':
+           search_by_author()
+       elif answer == '3':
+           recently_added()
+       elif answer == '4':
+           pass
+       elif answer == '5':
+           pass
+       elif answer == '6':
+           pass
+       elif answer == '7':
+           pass
+       elif answer == '8':
+           close()
+       else:
+        typer.secho('Invalid input', fg=typer.colors.RED)
+        main_menu()
+    else :
+       typer.secho(f''''
+        1  - Search a book by Name
+        2  - Search a book by Author
+        3  - Recently Added Books
+        4  - Most Read Books
+        5  - Most Favorite Books
+        6  - Most Read Genres
+        7  - Most Read Authors
+        8  - Add Book
+        9  - Borrow Book
+        10 - Return Book
+        11 - Mark Book as Read
+        12 - Add Book to Favorite
+        13 - Display All my Books
+        14 - Statistics
+        15 - Exit
+        \n ''', fg=typer.colors.BLUE)
+       answer = input("Enter the number of the command:").strip()
+       if answer == '1':
+           search_by_name()
+       elif answer == '2':
+           search_by_author()
+       elif answer == '3':
+           recently_added()
+       elif answer == '4':
+           pass
+       elif answer == '5':
+           pass
+       elif answer == '6':
+           pass
+       elif answer == '7':
+           pass
+       elif answer == '8':
+           add_book()
+       elif answer == '9':
+           borrow_book()
+       elif answer == '10':
+           pass
+       elif answer == '11':
+           pass
+       elif answer == '12':
+           pass
+       elif answer == '13':
+           pass
+       elif answer == '14':
+           pass
+       elif answer == '15':
+           close()
+       
+       else:
+        typer.secho('Invalid input', fg=typer.colors.RED)
+        main_menu()
+        
+        
+    
 @app.command("sign_up")
 def sign_up(username: str, password: str):
     global cur
@@ -85,7 +178,7 @@ def sign_up(username: str, password: str):
         typer.secho(f"Successfully signed up and signied in!", fg=typer.colors.GREEN)
         typer.secho('You can add your info for delivery later using function --help',\
             fg=typer.colors.BLUE)
-    close()
+    
 
 
 @app.command("sign_in")
@@ -99,13 +192,16 @@ def sign_in(username: str, password: str):
             typer.secho("Successfully signed in!", fg=typer.colors.GREEN)
             set_logined_true(username, cur)
             is_logined(cur)
+            main_menu()
         else:
             typer.secho("Wrong password", fg=typer.colors.RED)
+            
     else: 
         typer.secho('''This username doesn't exist!
-                        Please enter an existing username!''',\
+                       Please enter an existing username!''',\
                         fg=typer.colors.RED)
-    close()
+        
+    
 
 
 # Example function for tables, you can add more columns/row.
@@ -123,7 +219,130 @@ def display_table():
     console.print(table)
 
 
+@app.command("search_by_name")
+def search_by_name():
+    typer.secho("Searching a book by name!", fg=typer.colors.BLUE)
+    book_name = input('Enter book name: ').strip()
+    c = 0
+    cur = connect()
+    select_queries = (f"""SELECT book_id,book_name,author,pages,genre
+                      from book  
+                      where book_name LIKE '%{book_name}%'""")
+    cur.execute(select_queries)
+    data = cur.fetchall()
+    if data:
+        table = Table(show_header=True, header_style="bold blue")
+        table.add_column("#", style="dim", width=10)
+        table.add_column("Book ID", style="dim", min_width=10, justify=True)
+        table.add_column("Name", style="dim", min_width=10, justify=True)
+        table.add_column("Author", style="dim", min_width=10, justify=True)
+        table.add_column("Pages", style="dim", min_width=10, justify=True)
+        table.add_column("Genre", style="dim", min_width=10, justify=True)
+        table.add_column("Availability", style="dim",
+                         min_width=10, justify=True)
+        for i in range(0, len(data)):
+            c += 1
+            availability = is_available(data[i][0])
+            table.add_row(f'{c}', f'{data[i][0]}',
+                          f'{data[i][1]}', f'{data[i][2]}', f'{data[i][3]}', f'{data[i][4]}', f'{availability}')
 
+        console.print(table)
+        typer.secho(
+            'Press 1 to search again, OR any button to go back to Main menu', fg=typer.colors.BLUE)
+        answer = input().strip()
+        if answer == '1':
+            search_by_name()
+        else:
+            main_menu()
+    else:
+        typer.secho('No book is found', fg=typer.colors.RED)
+        typer.secho('Press 1 to search again, OR any button to go back to Main menu', fg=typer.colors.BLUE)
+        answer = input().strip()
+        if answer =='1':
+            search_by_name()
+        else:
+            main_menu()
+        
+
+
+@app.command("search_by_author")
+def search_by_author():
+    typer.secho("Searching a book by author!", fg=typer.colors.BLUE)
+    author_name = input('Enter Author name: ').strip()
+    c = 0
+    cur = connect()
+    select_queries = (f"""SELECT book_id,book_name,author,pages,genre
+                      from book  
+                      where author LIKE '%{author_name}%'""")
+    cur.execute(select_queries)
+    data = cur.fetchall()
+    if data:
+        table = Table(show_header=True, header_style="bold blue")
+        table.add_column("#", style="dim", width=10)
+        table.add_column("Book ID", style="dim", min_width=10, justify=True)
+        table.add_column("Name", style="dim", min_width=10, justify=True)
+        table.add_column("Author", style="dim", min_width=10, justify=True)
+        table.add_column("Pages", style="dim", min_width=10, justify=True)
+        table.add_column("Genre", style="dim", min_width=10, justify=True)
+        table.add_column("Availability", style="dim",
+                         min_width=10, justify=True)
+        for i in range(0, len(data)):
+            c += 1
+            availability = is_available(data[i][0])
+            table.add_row(f'{c}', f'{data[i][0]}',
+                          f'{data[i][1]}', f'{data[i][2]}', f'{data[i][3]}', f'{data[i][4]}', f'{availability}')
+
+        console.print(table)
+        typer.secho(
+            'Press 1 to search again, OR any button to go back to Main menu', fg=typer.colors.BLUE)
+        answer = input().strip()
+        if answer == '1':
+            search_by_author()
+        else:
+            main_menu()
+    else:
+        typer.secho('No Author is found', fg=typer.colors.RED)
+        typer.secho(
+            'Press 1 to search again, OR any button to go back to Main menu', fg=typer.colors.BLUE)
+        answer = input().strip()
+        if answer == '1':
+            search_by_author()
+        else:
+            main_menu()
+
+
+@app.command("recently_added")
+def recently_added(days: Optional[int] = 7):
+    conn = connect()
+    cur = conn.cursor()
+
+    now = datetime.now()
+    start_date = now - timedelta(days=days)
+
+    query = f"SELECT * FROM books WHERE date_added >= '{start_date}'"
+    cur.execute(query)
+    rows = cur.fetchall()
+
+    if not rows:
+        typer.echo(f"No books were added in the last {days} days.")
+        return
+
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("ID", style="dim", width=10)
+    table.add_column("Title", style="bold")
+    table.add_column("Author", style="dim", width=20)
+    table.add_column("Genre", style="dim", width=20)
+    table.add_column("Date Added", style="dim", width=20)
+
+    for row in rows:
+        book_id, title, author, genre, date_added = row
+        table.add_row(str(book_id), title, author, genre, str(date_added))
+
+    console.print(table)
+    conn.close()
+    
+    
+    
 @app.command('add_book')
 def add_book():
     '''It asks for the details of the book: name, author, # pages and genre. 
@@ -154,12 +373,12 @@ def add_book():
         count_quere = f"UPDATE book SET num_of_copy = num_of_copy + 1 WHERE book_id = '{book_id_db}'"
         cur.execute(count_quere)
     typer.secho('Successfully added a copy of book!', fg=typer.colors.GREEN)
-    close()
+    
 
 def is_available(book_id):
     '''Returns T (F) if amount of borrowed books less than amount of copy'''
     global cur
-    fetch_query = "SELECT count(*) FROM borrowing WHERE book_id = 1"
+    fetch_query = f"SELECT count(*) FROM borrowing WHERE book_id = {book_id}"
     cur.execute(fetch_query)
     borrowed_amount = cur.fetchone()[0]
 
@@ -200,4 +419,4 @@ def borrow_book(book_id):
 
 
 if __name__ == "__main__":
-    print(is_available(56))
+    start()
