@@ -146,13 +146,13 @@ def main_menu():
        elif answer == '9':
            borrow_book()
        elif answer == '10':
-           pass
+           return_book()
        elif answer == '11':
-           pass
+           mark_read()
        elif answer == '12':
-           pass
+           fav_book()
        elif answer == '13':
-           pass
+           my_books()
        elif answer == '14':
            pass
        elif answer == '15':
