@@ -75,7 +75,7 @@ def main_menu():
     global cur
     status = is_logined(cur)
     if not status: 
-       typer.secho(f''''
+       typer.secho(f'''
         1 - Search a book by Name
         2 - Search a book by Author
         3 - Recently Added Books
@@ -106,7 +106,7 @@ def main_menu():
         typer.secho('Invalid input', fg=typer.colors.RED)
         main_menu()
     else :
-       typer.secho(f''''
+       typer.secho(f'''
         1  - Search a book by Name
         2  - Search a book by Author
         3  - Recently Added Books
