@@ -4,6 +4,7 @@ from rich.console import Console
 from rich.table import Table
 from typing import Optional
 from datetime import datetime, timedelta
+from database import connect, close, is_username_exists
 
 
 
