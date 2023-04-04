@@ -1,9 +1,11 @@
 import typer
+import rich
 from rich.console import Console
 from rich.table import Table
 from typing import Optional
-from database import connect, close, is_username_exists
 from datetime import datetime, timedelta
+
+
 
 def set_logined_true(username, cur):
     '''Set True for logined user in Customer table'''
@@ -574,6 +576,35 @@ def my_books():
     print('AND YOUR FAVORITE BOOKS')
     console.print(table_fav)
 
+@app.command("most_read_books")
+def most_read_books():
+    global cur
+    fetch_query = "SELECT book.book_name \
+                    FROM book \
+                    JOIN borrowing ON book.book_id = borrowing.book_id \
+                    GROUP BY book.book_id \
+                    ORDER BY COUNT(borrowing.book_id) DESC;"
+    cur.execute(fetch_query)
+    
+    
+    global results
+    most_read_books=cur.fetchmany(5)
+    
+        
+    return most_read_books
+
+@app.command("most_favorite_books")
+def most_favorite_books():
+    global cur
+    fetch_query = "SELECT book_name \
+                    FROM book\
+                    JOIN borrowing ON book.book_id = borrowing.book_id\
+                    GROUP BY book.book_id\
+                    ORDER BY SUM(CASE WHEN borrowing.is_favorite THEN 1 ELSE 0 END) DESC"
+    cur.execute(fetch_query)
+    most_favorite_books = cur.fetchmany(5)
+    
+    return most_favorite_books
 
 if __name__ == "__main__":
     start()
