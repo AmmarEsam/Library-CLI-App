@@ -40,7 +40,7 @@ def login_check():
     else: 
         cur.execute(f"SELECT first_name FROM customer WHERE customer_id = {status}")
         first_name = cur.fetchone()[0]
-        print(f'{first_name} is loged in')
+        # print(f'{first_name} is loged in')
         return (status, first_name)
 
 
@@ -55,7 +55,7 @@ def start():
         Enter [r]egister for signing up
         Enter [l]et me in for signing in.
         Press other button for continue without signing in''', fg=typer.colors.GREEN)
-    log_out()
+    # log_out()
     global cur
     answer = input().strip().lower()
     if answer in ['r', 'reg', 'register']:
@@ -201,7 +201,7 @@ def sign_in(username: str, password: str):
             
     else: 
         typer.secho('''This username doesn't exist!
-                       Please enter an existing username!''',\
+                        Please enter an existing username!''',\
                         fg=typer.colors.RED)
         
     
@@ -344,8 +344,49 @@ def recently_added(days: Optional[int] = 7):
     console.print(table)
     conn.close()
     
+# ______________________USERS___METHODS__________________________________________######
+@app.command('history')
+def show_history():
+    '''Shows last 10 borrowed books.'''
+
+    global cur
+    tupl = login_check()
+    user_id, first_name = tupl
+
+    query = f"SELECT b.book_id, b.book_name, b.author, br.borowing_date, br.is_returned FROM book b \
+            LEFT JOIN borrowing br USING (book_id) WHERE br.customer_id = {user_id} ORDER BY is_returned \
+            LIMIT 10"
+    cur.execute(query)
+    data = cur.fetchall()
+
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("#", style="dim", width=4)
+    table.add_column("Book ID", style="dim", width=7)
+    table.add_column("Name", style="dim", width=23)
+    table.add_column("Author", style="dim", width=16)
+    table.add_column("Borrowing date", style="dim", width=16)
+    table.add_column("Returned", style="dim", width=7, justify= True)
+
+    count = 1
+
+    for row in data:
+        table.add_row(f"{count}", f"{row[0]}", f"{row[1]}", f"{row[2]}", f"{row[3]}", f"{row[4]}")
+        count += 1
+
+    print(f'Hey {first_name}! HERE ARE LAST 10 BOOKS YOU BORROWED')
+    console.print(table)
     
-    
+    message = "If you want to return book, press [r]"
+    typer.secho(message, fg=typer.colors.GREEN)
+    answer = input()
+    if answer in 'rR':
+        return_book()
+    else:
+        main_menu()
+
+    close()
+
+
 @app.command('add_book')
 def add_book():
     '''It asks for the details of the book: name, author, # pages and genre. 
@@ -376,9 +417,12 @@ def add_book():
         count_quere = f"UPDATE book SET num_of_copy = num_of_copy + 1 WHERE book_id = '{book_id_db}'"
         cur.execute(count_quere)
     typer.secho('Successfully added a copy of book!', fg=typer.colors.GREEN)
-    
+    close()
 
-def is_book_exists(book_id: int):
+def is_book_exists(book_id: Optional[int] = False):
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
+
     book_exists_query = f"SELECT count(*) FROM book WHERE book_id = {book_id}"
     cur.execute(book_exists_query)
     book_exists = cur.fetchone()[0]
@@ -389,8 +433,12 @@ def is_book_exists(book_id: int):
         typer.secho(message, fg=typer.colors.RED)
         return False
 
-def is_available(book_id: int):
+def is_available(book_id: Optional[int] = False):
     '''Returns T (F) if amount of borrowed books less than amount of copy'''
+
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
+
     global cur
     fetch_query = f"SELECT count(*) FROM borrowing WHERE book_id = {book_id}"
     cur.execute(fetch_query)
@@ -411,12 +459,15 @@ def is_available(book_id: int):
 
 
 @app.command('borrow_book')
-def borrow_book(book_id: int):
+def borrow_book(book_id: Optional[int] = False):
     '''Takes BOOK ID as an argument. 
     If this book is available, saves the data as the signed-in user borrowed the book 
     and reduces the available amount of the book. 
     If not available, then logs an error message saying this book 
     is not available.'''
+
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
 
     global cur
     tupl = login_check()
@@ -434,12 +485,16 @@ def borrow_book(book_id: int):
         message = f"Sorry, {first_name}. Book {book_id} is not available!\
                 Try again later."
         typer.secho(message, fg=typer.colors.BLUE)
+    close()
 
 @app.command('return_book')
-def return_book(book_id: int):
+def return_book(book_id: Optional[int] = False):
     '''This command takes BOOK ID as an argument. 
     If the signed-in user borrowed the book previously, 
     it saves the data as this user returned the book.'''
+
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
 
     global cur
     tupl = login_check()
@@ -471,19 +526,18 @@ def return_book(book_id: int):
         message = f"Hi {first_name}! You retirned book {book_id}"
         typer.secho(message, fg=typer.colors.GREEN)
 
-        
-
-
-
     else:
         message = f"Hi {first_name}! It looks like you didn't borrow the book or you've already return it."
         typer.secho(message, fg=typer.colors.RED)
     close()
 
 @app.command("mark_read")
-def mark_read(book_id: int):
+def mark_read(book_id: Optional[int] = 0):
     '''This command takes BOOK ID as an argument. 
     It marks this book as “read” for the signed-in user.'''
+
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
 
     global cur
     tupl = login_check()
@@ -498,9 +552,12 @@ def mark_read(book_id: int):
     close()
 
 @app.command("fav_nook")
-def fav_book(book_id: int):
+def fav_book(book_id: Optional[int] = False):
     '''This command takes BOOK ID as an argument. 
     It adds this book to signed-in userʼs favorites.'''
+
+    if not book_id:
+        book_id = int(input('Enter id of book, please...   '))
 
     global cur
     tupl = login_check()
@@ -524,7 +581,7 @@ def my_books():
     user_id, first_name = tupl
 
     def fetch_table(column):
-        query = f"SELECT b.book_id, b.book_name, b.author, b.pages, b.genre FROM book b\
+        query = f"SELECT DISTINCT b.book_id, b.book_name, b.author, b.pages, b.genre FROM book b\
                 INNER JOIN borrowing br USING(book_id)\
                 WHERE br.customer_id = {user_id} AND br.{column} = TRUE"
         cur.execute(query)
@@ -535,11 +592,11 @@ def my_books():
 
     #create a table:
     table_read = Table(show_header=True, header_style="bold blue")
-    table_read.add_column("#", style="dim", width=10)
-    table_read.add_column("Book ID", style="dim", width=10)
-    table_read.add_column("Name", style="dim", width=10)
-    table_read.add_column("Author", style="dim", width=10)
-    table_read.add_column("# Pages", style="dim", width=10)
+    table_read.add_column("#", style="dim", width=4)
+    table_read.add_column("Book ID", style="dim", width=7)
+    table_read.add_column("Name", style="dim", width=23)
+    table_read.add_column("Author", style="dim", width=16)
+    table_read.add_column("# Pages", style="dim", width=7)
     table_read.add_column("Genre", style="dim", width=10)
     table_read.add_column("Abaliability", style="dim", min_width=10, justify=True)
 
@@ -557,11 +614,11 @@ def my_books():
 
     #create a table:
     table_fav = Table(show_header=True, header_style="bold blue")
-    table_fav.add_column("#", style="dim", width=10)
-    table_fav.add_column("Book ID", style="dim", width=10)
-    table_fav.add_column("Name", style="dim", width=10)
-    table_fav.add_column("Author", style="dim", width=10)
-    table_fav.add_column("# Pages", style="dim", width=10)
+    table_fav.add_column("#", style="dim", width=4)
+    table_fav.add_column("Book ID", style="dim", width=7)
+    table_fav.add_column("Name", style="dim", width=23)
+    table_fav.add_column("Author", style="dim", width=16)
+    table_fav.add_column("# Pages", style="dim", width=7)
     table_fav.add_column("Genre", style="dim", width=10)
     table_fav.add_column("Abaliability", style="dim", min_width=10, justify=True)
 
@@ -574,6 +631,8 @@ def my_books():
     print('AND YOUR FAVORITE BOOKS')
     console.print(table_fav)
 
+    close()
+
 
 if __name__ == "__main__":
-    start()
+    app()
