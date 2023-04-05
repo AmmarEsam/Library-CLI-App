@@ -405,7 +405,7 @@ def add_book():
     genre = input('Genre: ').strip()
 
     check_quire = f"SELECT book_id, book_name, author FROM book\
-        WHERE book_name = '{name}' AND author = '{author}'"
+        WHERE book_name = '{name.title()}' AND author = '{author.title()}'"
     cur.execute(check_quire)
     fetched_book = cur.fetchone()
     if fetched_book == None:
@@ -413,8 +413,8 @@ def add_book():
         cur.execute(last_id_query)
         last_id = cur.fetchone()[0]
 
-        add_query = f"INSERT INTO book (book_id, book_name, author, pages, genre)\
-                VALUES ({last_id+1}, '{name}', '{author}', '{num_of_pages}', '{genre}')"
+        add_query = f"INSERT INTO book (book_id, book_name, author, pages, genre, num_of_copy, add_date)\
+                VALUES ({last_id+1}, '{name}', '{author}', '{num_of_pages}', '{genre}', 0, CURRENT DATE)"
         cur.execute(add_query)
     else:
         book_id_db = fetched_book[0]
