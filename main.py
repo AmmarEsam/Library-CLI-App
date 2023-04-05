@@ -577,6 +577,12 @@ def my_books():
     print('AND YOUR FAVORITE BOOKS')
     console.print(table_fav)
 
+    typer.secho(
+        'press ENTER to go back to Main menu', fg=typer.colors.BLUE)
+    answer = input().strip()
+   
+    main_menu() 
+
 @app.command("most_read_books")
 def most_read_books():
  
