@@ -616,6 +616,10 @@ def most_read_books():
             continue
 
     console.print(table)
+    
+    typer.secho(
+        'press ENTER to go back to Main menu', fg=typer.colors.BLUE)
+    answer = input().strip()
    
     main_menu() 
         
@@ -655,6 +659,9 @@ def most_favorite_books():
 
     console.print(table)
    
+    typer.secho(
+        'press ENTER to go back to Main menu', fg=typer.colors.BLUE)
+    answer = input().strip()
     main_menu() 
         
     return 
