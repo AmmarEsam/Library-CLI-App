@@ -233,7 +233,7 @@ def search_by_name():
     cur = connect()
     select_queries = (f"""SELECT book_id,book_name,author,pages,genre
                       from book  
-                      where book_name LIKE '%{book_name}%'""")
+                      where LOWER(book_name) LIKE LOWER('%{book_name}%')""")
     cur.execute(select_queries)
     data = cur.fetchall()
     if data:
@@ -279,7 +279,7 @@ def search_by_author():
     cur = connect()
     select_queries = (f"""SELECT book_id,book_name,author,pages,genre
                       from book  
-                      where author LIKE '%{author_name}%'""")
+                      where LOWER(author) LIKE LOWER('%{author_name}%')""")
     cur.execute(select_queries)
     data = cur.fetchall()
     if data:
@@ -659,6 +659,7 @@ def most_favorite_books():
         
     return 
     
+
 
 if __name__ == "__main__":
     start()
