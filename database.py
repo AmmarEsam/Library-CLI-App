@@ -7,7 +7,7 @@ def connect():
         # print('Connecting to the PostgreSQL database...')
         
         conn = psycopg2.connect(
-            host="localhost", database="library_v2", user="postgres", password='1234'
+
         )
         global cur
         cur = conn.cursor()
@@ -17,13 +17,11 @@ def connect():
         print(error)
     
     finally:
-            return cur
+        return cur
     
 def close():
     if conn is not None:
         conn.close()
-        print('Conn closed')
-
 #____________COMMON METHODS_____________________:
 
 def is_username_exists(name):
