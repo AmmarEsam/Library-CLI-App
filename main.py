@@ -58,7 +58,7 @@ def start():
         Enter [r]egister for signing up
         Enter [l]et me in for signing in.
         Press other button for continue without signing in''', fg=typer.colors.GREEN)
-    # log_out()
+    log_out()
     global cur
     answer = input().strip().lower()
     if answer in ['r', 'reg', 'register']:
@@ -638,8 +638,6 @@ def my_books():
     print('AND YOUR FAVORITE BOOKS')
     console.print(table_fav)
 
-
-    close()
 
     typer.secho(
         'press ENTER to go back to Main menu', fg=typer.colors.BLUE)
