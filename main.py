@@ -137,9 +137,9 @@ def main_menu():
        elif answer == '3':
            recently_added()
        elif answer == '4':
-           pass
+           most_read_books()
        elif answer == '5':
-           pass
+           most_favorite_books()
        elif answer == '6':
            pass
        elif answer == '7':
@@ -579,33 +579,86 @@ def my_books():
 
 @app.command("most_read_books")
 def most_read_books():
+ 
     global cur
-    fetch_query = "SELECT book.book_name \
-                    FROM book \
-                    JOIN borrowing ON book.book_id = borrowing.book_id \
-                    GROUP BY book.book_id \
-                    ORDER BY COUNT(borrowing.book_id) DESC;"
+    fetch_query='SELECT book.*, COUNT(borrowing.book_id) AS times_read \
+        FROM book \
+        JOIN borrowing ON book.book_id = borrowing.book_id \
+        GROUP BY book.book_id \
+        ORDER BY times_read DESC;'
+        
     cur.execute(fetch_query)
     
     
-    global results
-    most_read_books=cur.fetchmany(5)
+   
+    most_read_books=cur.fetchmany(10)
     
+   
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Book ID", style="dim", min_width=4, justify=True)
+    table.add_column("ISBN", style="dim", min_width=7, justify=True)
+    table.add_column("Name", style="dim", min_width=10, justify=True)
+    table.add_column("Author", style="dim", min_width=10, justify=True)
+    # table.add_column("Pages", style="dim", min_width=5, justify=True)
+    table.add_column("Genre", style="dim", min_width=10, justify=True)
+    table.add_column("times_read", style="dim",min_width=10, justify=True)
+    
+    for i in range(0, 9):
+    
+        try:
+            table.add_row(f'{i+1}', f'{most_read_books[i][0]}',
+                   f'{most_read_books[i][1]}', f'{most_read_books[i][2]}', 
+                   f'{most_read_books[i][3]}',
+                   f'{most_read_books[i][5]}', f'{most_read_books[i][9]}',)
+            table.add_row('--','---','---','---','---','---','---')
+        except:
+            continue
+
+    console.print(table)
+   
+    main_menu() 
         
-    return most_read_books
+    return 
 
 @app.command("most_favorite_books")
 def most_favorite_books():
     global cur
-    fetch_query = "SELECT book_name \
-                    FROM book\
-                    JOIN borrowing ON book.book_id = borrowing.book_id\
-                    GROUP BY book.book_id\
-                    ORDER BY SUM(CASE WHEN borrowing.is_favorite THEN 1 ELSE 0 END) DESC"
+    fetch_query = "SELECT book.*, SUM(CASE WHEN borrowing.is_favorite THEN 1 ELSE 0 END) AS times_favorited \
+                    FROM book \
+                    JOIN borrowing ON book.book_id = borrowing.book_id \
+                    GROUP BY book.book_id \
+                    ORDER BY times_favorited DESC;"
     cur.execute(fetch_query)
-    most_favorite_books = cur.fetchmany(5)
+    most_favorite_books = cur.fetchmany(10)
     
-    return most_favorite_books
+    table = Table(show_header=True, header_style="bold blue")
+    table.add_column("#", style="dim", width=3)
+    table.add_column("Book ID", style="dim", min_width=4, justify=True)
+    table.add_column("ISBN", style="dim", min_width=7, justify=True)
+    table.add_column("Name", style="dim", min_width=10, justify=True)
+    table.add_column("Author", style="dim", min_width=10, justify=True)
+    # table.add_column("Pages", style="dim", min_width=5, justify=True)
+    table.add_column("Genre", style="dim", min_width=10, justify=True)
+    table.add_column("times_fav", style="dim",min_width=10, justify=True)
+    
+    for i in range(0, 9):
+    
+        try:
+            table.add_row(f'{i+1}', f'{most_favorite_books[i][0]}',
+                   f'{most_favorite_books[i][1]}', f'{most_favorite_books[i][2]}', 
+                   f'{most_favorite_books[i][3]}',
+                   f'{most_favorite_books[i][5]}', f'{most_favorite_books[i][9]}',)
+            table.add_row('--','---','---','---','---','---','---')
+        except:
+            continue
+
+    console.print(table)
+   
+    main_menu() 
+        
+    return 
+    
 
 if __name__ == "__main__":
     start()
