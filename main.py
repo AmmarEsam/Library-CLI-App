@@ -409,8 +409,12 @@ def add_book():
     cur.execute(check_quire)
     fetched_book = cur.fetchone()
     if fetched_book == None:
-        add_query = f"INSERT INTO book (book_name, author, pages, genre)\
-                VALUES ('{name}', '{author}', '{num_of_pages}', '{genre}')"
+        last_id_query = "SELECT max(book_id) FROM book"
+        cur.execute(last_id_query)
+        last_id = cur.fetchone()[0]
+
+        add_query = f"INSERT INTO book (book_id, book_name, author, pages, genre)\
+                VALUES ({last_id+1}, '{name}', '{author}', '{num_of_pages}', '{genre}')"
         cur.execute(add_query)
     else:
         book_id_db = fetched_book[0]
@@ -635,4 +639,4 @@ def my_books():
 
 
 if __name__ == "__main__":
-    app()
+    add_book()
