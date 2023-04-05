@@ -1,9 +1,12 @@
 import typer
+import rich
 from rich.console import Console
 from rich.table import Table
 from typing import Optional
-from database import connect, close, is_username_exists
 from datetime import datetime, timedelta
+from database import connect, close, is_username_exists
+
+
 
 def set_logined_true(username, cur):
     '''Set True for logined user in Customer table'''
@@ -134,9 +137,9 @@ def main_menu():
        elif answer == '3':
            recently_added()
        elif answer == '4':
-           pass
+           most_read_books()
        elif answer == '5':
-           pass
+           most_favorite_books()
        elif answer == '6':
            pass
        elif answer == '7':
@@ -230,7 +233,7 @@ def search_by_name():
     cur = connect()
     select_queries = (f"""SELECT book_id,book_name,author,pages,genre
                       from book  
-                      where book_name LIKE '%{book_name}%'""")
+                      where LOWER(book_name) LIKE LOWER('%{book_name}%')""")
     cur.execute(select_queries)
     data = cur.fetchall()
     if data:
@@ -276,7 +279,7 @@ def search_by_author():
     cur = connect()
     select_queries = (f"""SELECT book_id,book_name,author,pages,genre
                       from book  
-                      where author LIKE '%{author_name}%'""")
+                      where LOWER(author) LIKE LOWER('%{author_name}%')""")
     cur.execute(select_queries)
     data = cur.fetchall()
     if data:
@@ -635,7 +638,7 @@ def my_books():
     print('AND YOUR FAVORITE BOOKS')
     console.print(table_fav)
 
-    close()
+
 
 
 if __name__ == "__main__":
