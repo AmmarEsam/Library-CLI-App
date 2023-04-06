@@ -7,7 +7,7 @@ def connect():
         # print('Connecting to the PostgreSQL database...')
         
         conn = psycopg2.connect(
-            host="localhost", database="library", user="postgres", password='123456'
+            host="localhost", database="library_v3", user="postgres", password='postgres'
         )
         global cur
         cur = conn.cursor()

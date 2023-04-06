@@ -738,4 +738,4 @@ def most_favorite_books():
 
 
 if __name__ == "__main__":
-    start()
+    app()
