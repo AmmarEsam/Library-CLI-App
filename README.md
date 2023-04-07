@@ -3,9 +3,9 @@
 ## About
 
 This is Library Command-line application.
-Developed as part of Data Science of the Fenyx academy of the Fenyx academy. 
+Developed as part of Data Science in Fenyx academy. 
 
-In the code we use '''psycopg2, typer, typing, reach''' modules.
+In the code we use '''psycopg2, typer, typing, rich''' modules.
 
 ## Getting started
 
