@@ -30,9 +30,9 @@ The project uses Postgresql to handle the database. The ERD is presented below.
 
 Authors of project with github-links
 
-1. [Ammar Esam](https://github.com/AmmarEsam)
-2. [Osman Bahadir Yilmaz](https://github.com/OsmanBahadirYlmz)
-3. [Danil Melnikov](https://github.com/meldanil)
+1. [Danil Melnikov](https://github.com/meldanil)
+2. [Ammar Esam](https://github.com/AmmarEsam)
+3. [Osman Bahadir Yilmaz](https://github.com/OsmanBahadirYlmz)
 4. [Kemal](https://github.com/Kemal919191)
 5. [Abdullah Ali](https://github.com/AbdullahBetl)
 
